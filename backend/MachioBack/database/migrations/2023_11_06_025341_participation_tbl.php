@@ -18,13 +18,14 @@ return new class extends Migration
             $table->boolean('classification');
             $table->integer('score');
             $table->integer('rank');						
+            $table->double('latitude');
+            $table->double('longitude');						
             $table->timestamps();
             $table->foreign('event_id')->references('event_id')->on('event_tbl');    
             $table->foreign('team_id')->references('team_id')->on('team_tbl');
             $table->foreign('user_id')->references('user_id')->on('user_tbl');
         });
     }
-
     /**
      * Reverse the migrations.
      */
