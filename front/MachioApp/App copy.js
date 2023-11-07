@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View,TouchableOpacity,Platform,} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {permissions} from 'react-native-permissions';
+const STATUSBAR_HEIGHT = Platform.OS == "ios" ? 20: StatusBar.currentHeight;
+
 export default class App extends React.Component {
   render() {
     return (
