@@ -1,11 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, Platform,TouchableOpacity,Button, } from 'react-native';
+import { StyleSheet, Text, View, Platform, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
-import { Table, Row, Rows } from 'react-native-table-component';
-
+import { Table, Rows } from 'react-native-table-component';
+import Menu from './Menu';
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -13,8 +13,10 @@ export default class App extends React.Component {
       latitude: null,
       longitude: null,
       message: '位置情報取得中',
+      gameData: null,
     };
   }
+
   componentDidMount() {
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this.setState({
@@ -22,6 +24,7 @@ export default class App extends React.Component {
       });
     } else {
       this.getLocationAsync();
+      this.fetchDataFromAPI();
     }
   }
 
@@ -40,17 +43,28 @@ export default class App extends React.Component {
       message: '位置情報を取得しました',
     });
   };
-  
+
+  fetchDataFromAPI = () => {
+    fetch('https://3765-114-142-110-43.ngrok-free.app/get_location', {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // 取得したデータをstateにセット
+        this.setState({ gameData: data });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   render() {
-    const tableData = [
-      ['￥', '2,000,000'],
-      ['確保', '4人']
-    ];
-    
+    const tableData = [['￥', '2,000,000'], ['確保', '4人']];
+
     if (this.state.latitude !== null && this.state.longitude !== null) {
       return (
         <View style={styles.container}>
-          <View style={styles.header}>
+           <View style={styles.header}>
             <Text style={styles.text}>
               まちなか鬼ごっこ
             </Text>
@@ -60,31 +74,29 @@ export default class App extends React.Component {
               🔔1:19:58
             </Text>
           </View>
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude: this.state.latitude,
-                longitude: this.state.longitude,
-                latitudeDelta: 0.02922,
-                longitudeDelta: 0.02521,
-              }}
-              showsUserLocation={true}
-              >
-              <Marker
-                coordinate={{
-                  latitude: this.state.latitude + 0.001,
-                  longitude: this.state.longitude,
-                }}
-                title="ずっと真夜中でいいのに。"
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: this.state.latitude,
+              longitude: this.state.longitude,
+              latitudeDelta: 0.02922,
+              longitudeDelta: 0.02521,
+            }}
+            showsUserLocation={true}
+          >
+            {this.state.gameData &&
+              this.state.gameData.length > 0 &&
+              this.state.gameData.map((location, index) => (
+                <Marker
+                  key={index}
+                  coordinate={{
+                    latitude: location[1],
+                    longitude: location[2],
+                  }}
+                  title={location[0]}
                 />
-              <Marker
-                coordinate={{
-                  latitude: this.state.latitude,
-                  longitude: this.state.longitude + 0.001,
-                }}
-                title="秒針を噛む"
-                />
-            </MapView>
+              ))}
+          </MapView>
           <View style={styles.middole}>
           </View>
             <Table style={styles.textbox}>
@@ -92,21 +104,8 @@ export default class App extends React.Component {
           </Table>
           <View style={styles.middole}>
           </View>
-          <View style={styles.fotter}>
-              <TouchableOpacity onPress={this._onPressButton} style={styles.button}>
-                <Text>start</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={this._onPressButton} style={styles.button}>
-                <Text>end</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={this._onPressButton} style={styles.button}>
-                <Text>start</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={this._onPressButton} style={styles.button}>
-                <Text>end</Text>
-              </TouchableOpacity>
+            <Menu/>
           </View>
-        </View>
       );
     } else {
       return (

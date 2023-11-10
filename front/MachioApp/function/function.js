@@ -1,35 +1,45 @@
-import React, { Component } from 'react';
-import { View, Text, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import Constants from 'expo-constants';
 
-class MyComponent extends Component {
-  constructor() {
-    super();
-    this.state = {
-      data: null,
-    };
-  }
+const YourComponent = () => {
+  const [gameData, setGameData] = useState([]);
 
-  fetchDataFromAPI = () => {
-    fetch('https://127.0.0.1:8000/get_location', {
+  const fetchDataFromAPI = () => {
+    fetch('https://34be-114-142-110-43.ngrok-free.app/get_location', {
       method: 'GET',
     })
       .then((response) => response.json())
       .then((data) => {
-        this.setState({ data });
+        setGameData(data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  render() {
-    return (
-      <View>
-        <Button title="Fetch Data" onPress={this.fetchDataFromAPI} />
-        {this.state.data && <Text>{JSON.stringify(this.state.data)}</Text>}
-      </View>
-    );
-  }
-}
+  useEffect(() => {
+    fetchDataFromAPI();
+  }, []); // コンポーネントがマウントされたときにデータを取得
 
-export default MyComponent;
+  return (
+    <View>
+      {gameData &&
+        gameData.length > 0 &&
+        gameData.map((location, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: location[1],
+              longitude: location[2],
+            }}
+            title={location[0]}
+          />
+        ))}
+    </View>
+  );
+};
+
+export default YourComponent;
